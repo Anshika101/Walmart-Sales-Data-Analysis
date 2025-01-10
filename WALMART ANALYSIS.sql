@@ -1,0 +1,256 @@
+CREATE DATABASE WALLMART_SALES;
+USE WALLMART_SALES;
+CREATE TABLE SALES(
+INVOICE_ID VARCHAR(30) NOT NULL PRIMARY KEY,
+BRANCH VARCHAR(5) NOT NULL,
+CITY VARCHAR(30) NOT NULL,
+CUSTOMER_TYPE VARCHAR(30) NOT NULL,
+GENDER VARCHAR(10) NOT NULL,
+PRODUCT_LINE VARCHAR(100) NOT NULL,
+UNIT_PRICE DECIMAL(10,2) NOT NULL,
+QUANTITY INTEGER NOT NULL,
+VAT FLOAT(6,4) NOT NULL,
+TOTAL DECIMAL(12,4) NOT NULL,
+DATE DATETIME NOT NULL,
+TIME TIME NOT NULL,
+PAYMENT_METHOD VARCHAR(15) NOT NULL,
+COGS DECIMAL(10,2) NOT NULL,
+GROSS_MARGIN_PCT FLOAT(11,9),
+GROSS_INCOME DECIMAL(12,4) NOT NULL,
+RATING FLOAT(2,1)
+);
+SELECT * FROM SALES;
+
+
+--  ----------------------------------------------------------------------------------------------------------------------------------------------------------
+--  ---------------FEATURE ENGINEERING------------------------------------------------------------------------------------------------------------------------
+
+--  TIME-OF_DAY
+
+SELECT TIME,
+(CASE
+WHEN `TIME`  BETWEEN "00:00:00" AND "12:00:00" THEN "MORNING"
+WHEN `TIME` BETWEEN "12:01:00" AND "16:00:00" THEN "AFTERNOON"
+ELSE "EVENING"
+END ) AS TIME_OF_DATE
+FROM SALES;
+
+ALTER TABLE SALES ADD COLUMN TIME_OF_DAY VARCHAR(20);
+
+UPDATE SALES
+SET TIME_OF_DAY=(CASE
+WHEN `TIME`  BETWEEN "00:00:00" AND "12:00:00" THEN "MORNING"
+WHEN `TIME` BETWEEN "12:01:00" AND "16:00:00" THEN "AFTERNOON"
+ELSE "EVENING"
+END);
+
+SELECT * FROM SALES;
+
+-- -----------------------------------------------------DAY_NAME(USING FUNCTION DAYNAME)
+
+SELECT DATE,
+DAYNAME(DATE)
+FROM SALES;
+
+ALTER TABLE SALES ADD COLUMN DAY_NAME VARCHAR(10);
+
+UPDATE SALES
+SET DAY_NAME= DAYNAME(DATE);
+
+-- ------------------------------MONTH_NAME(USING FUNCTION MONTHNAME)
+
+SELECT DATE,
+MONTHNAME(DATE)
+FROM SALES;
+
+ALTER TABLE SALES ADD COLUMN MONTH_NAME VARCHAR(10);
+UPDATE SALES
+SET MONTH_NAME=MONTHNAME(DATE);
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------
+-- ------------------------------------------------------GENERIC----------------------------------------------------------------------------------------------
+
+-- HOW MANY UNIQUE CITIES DOES THE DATA HAVE?
+SELECT DISTINCT(CITY)
+FROM SALES;
+
+-- HOW MANY CITIES EACH BRANCH?
+
+SELECT DISTINCT(CITY),
+BRANCH FROM SALES;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------PRODUCT---------------------------------------------------------------------------------------------
+
+-- HOW MANY UNIQUE PRODUCT LINES DOES THE DATA HAVE?
+SELECT COUNT(DISTINCT PRODUCT_LINE)
+FROM SALES;
+
+-- WHAT IS THE MOST COMMON PAYMENT METHOD?
+
+SELECT PAYMENT_METHOD,
+COUNT(PAYMENT_METHOD) 
+FROM SALES
+GROUP BY PAYMENT_METHOD
+ORDER BY COUNT(PAYMENT_METHOD);      -- OPTIONAL!
+
+-- WHAT IS THE MOST SELLING PRODUCT LINE?
+
+SELECT PRODUCT_LINE,
+COUNT(PRODUCT_LINE)
+FROM SALES
+GROUP BY PRODUCT_LINE
+ORDER BY COUNT(PRODUCT_LINE) DESC;
+
+-- WHAT IS THE TOTAL REVENUE BY MONTH?
+
+SELECT MONTH_NAME,
+SUM(TOTAL)
+FROM SALES
+GROUP BY MONTH_NAME
+ORDER BY SUM(TOTAL) DESC;
+
+-- WHICH MONTH HAS THE LARGEST COGS(cost of goods sold)?
+
+SELECT MONTH_NAME,
+SUM(COGS)
+FROM SALES
+GROUP BY MONTH_NAME
+ORDER BY SUM(COGS) DESC;
+
+-- WHAT PRODUCT LINE HAD THE LARGEST REVENUE?
+
+SELECT PRODUCT_LINE,
+SUM(TOTAL)
+FROM SALES
+GROUP BY PRODUCT_LINE
+ORDER BY SUM(TOTAL) DESC;
+
+
+-- WHAT PRODUCT LINE HAD THE LARGEST VAT(value added tax)?-- 
+
+SELECT PRODUCT_LINE,
+AVG(VAT)
+FROM SALES
+GROUP BY PRODUCT_LINE
+ORDER BY AVG(VAT) DESC;   -- (could have also used sum)!
+
+-- WHICH BRANCH SOLD MORE PRODUCTS THAN AVERAGE SOLD PRODUCTS?
+
+SELECT BRANCH,
+SUM(QUANTITY),
+AVG(QUANTITY)
+FROM SALES
+GROUP BY BRANCH
+HAVING SUM(QUANTITY)>AVG(QUANTITY) ;
+
+-- WHAT IS THE MOST COMMON PRODUCT LINE BY GENDER?
+
+SELECT PRODUCT_LINE,
+GENDER,
+COUNT(GENDER)
+FROM SALES
+GROUP BY GENDER,PRODUCT_LINE
+ORDER BY COUNT(GENDER);
+
+-- WHAT IS THE AVERAGE RATING OF EACH PRODUCT LINE?
+
+SELECT PRODUCT_LINE, 
+ROUND(AVG(RATING),2)
+FROM SALES
+GROUP BY PRODUCT_LINE
+ORDER BY AVG(RATING); 
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------
+-- -----------------------------------------------------SALES-------------------------------------------------------------------------------------------------
+
+-- NUMBER OF SALES MADE IN EACH TIME OF THE DAY PER WEEKDAY?
+
+SELECT TIME_OF_DAY,
+COUNT(QUANTITY)
+FROM SALES
+GROUP BY TIME_OF_DAY;
+
+-- WHICH OF THE CUSTOMER TYPES BRING THE MOST REVENUE?
+
+SELECT CUSTOMER_TYPE,
+SUM(TOTAL)              -- COUNT CAN ALSO BE USED!
+FROM SALES
+GROUP BY CUSTOMER_TYPE;
+
+-- WHICH CITY HAS THE LARGEST TAX PERCENTAGE/VAT(VALUE ADDED TAX)?
+
+SELECT CITY,
+ROUND(AVG(VAT),2)            -- SUM COULD HAVE ALSO USED!
+FROM SALES
+GROUP BY CITY
+ORDER BY AVG(VAT) DESC;
+
+-- WHICH CUSTOMER TYPE PAYS THE MOST VAT?
+
+SELECT CUSTOMER_TYPE,
+ROUND(AVG(VAT),2)
+FROM SALES
+GROUP BY CUSTOMER_TYPE;
+
+
+-- ---------------------------------------------------------------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------CUSTOMER------------------------------------------------------------------------------------------
+
+-- HOW MANY UNIQUE CUSTOMER TYPE DOES THE DTA HAVE?
+
+SELECT COUNT(DISTINCT CUSTOMER_TYPE)
+FROM SALES;
+
+-- HOW MANY UNIQUE PAYMENT METHODS DOES THE DATA HAVE?
+
+SELECT DISTINCT PAYMENT_METHOD
+FROM SALES;
+
+-- WHAT IS THE MOST COMMON CUSTOMER TYPE?
+
+SELECT COUNT(CUSTOMER_TYPE),CUSTOMER_TYPE
+FROM SALES
+GROUP BY CUSTOMER_TYPE; 
+
+-- WHAT IS THE GENDER OD THE MOST CUSTOERS?
+
+SELECT COUNT(GENDER),GENDER
+FROM SALES
+GROUP BY GENDER;
+
+-- WHAT IS THE GENDER DISTRIBUTION PER BRANCH?
+
+SELECT 
+GENDER,
+COUNT(GENDER)
+FROM SALES
+WHERE BRANCH="A"
+GROUP BY GENDER;
+
+-- WHICH TIME OF DAY CUSTOMERS GIVE MOST RATINGS?
+
+SELECT TIME_OF_DAY,
+COUNT(RATING)
+FROM SALES
+GROUP BY TIME_OF_DAY;
+
+-- WHICH TIME OF DAY CUSTOMERS GIVE MOST RATINGS PER BRANCH?
+
+SELECT TIME_OF_DAY,
+COUNT(RATING)
+FROM SALES
+WHERE BRANCH="A"
+GROUP BY TIME_OF_DAY;
+
+-- WHICH DAY OF THE WEEK HAS THE BEST AVG RATING?
+
+SELECT DAY_NAME,
+AVG(RATING)
+FROM SALES
+GROUP BY DAY_NAME;
+
+#-------------------------------------------------------------END--------------------------------------------------------------------------------------------
