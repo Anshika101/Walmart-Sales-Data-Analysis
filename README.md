@@ -15,6 +15,10 @@ The goal of this project is to create and design a database and execute SQL quer
 9.  WHICH TIME OF DAY CUSTOMERS GIVE MOST RATINGS PER BRANCH?
 10.  WHICH DAY OF THE WEEK HAS THE BEST AVG RATING?
 - File Interaction-<a href="https://github.com/Anshika101/Walmart-Sales-Data-Analysis/blob/main/WALMART%20ANALYSIS.sql">View SQL File</a>
+## Conclusion-
+To furthur improve salaes Walmart should focus on high-performing product lines,time periods and understanding customer behavior.For instance here its is clearly seen that Custmor who are of type "Member" pay more VAT and bring most revenue hence personalized customer engagement should be done to optimize marketing campaigns and advertisements.
+Also Branch and City specific analysis can guide inventory decisions and tailored promotions.
+This SQL project provides an in-depth analysis of Walmart's sales data, By quering several KPIs helps uncover actionable insights into sales performance, customer behavior, and product trends.
 
 
 
